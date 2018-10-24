@@ -1,0 +1,13 @@
+version: '3.1'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/rails/Dockerfile
+    environment:
+      - RAILS_ENV=production
+    command: /bin/sh -c "rm -f ./tmp/pids/server.pid && rails db:create db:migrate && wheneverize . && whenever -c && whenever -w && whenever --update-crontab && whenever && service cron restart && echo 'wheneverized!' && rails s"
+    volumes:
+      - .:/app
+    stdin_open: true
+    tty: true

@@ -1,0 +1,30 @@
+version: '3.1'
+services:
+  db:
+    image: postgres
+    restart: always
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=aws_s3_sdk_sampledev
+      - POSTGRES_PASSWORD=aws_s3_sdk_sampledev
+    ports:
+      - '5423:5432'
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/rails/Dockerfile
+    environment:
+      - RAILS_ENV=development
+      - DATABASE_USERNAME=aws_s3_sdk_sampledev
+      - DATABASE_PASSWORD=aws_s3_sdk_sampledev
+      - DATABASE_HOST=db
+    command: /bin/sh -c "rm -f ./tmp/pids/server.pid && rails db:create db:migrate && wheneverize . && whenever -w && cron -f && echo 'wheneverized!' && rails s"
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    links:
+      - db
+volumes:
+  postgres_data:
